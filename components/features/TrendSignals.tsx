@@ -92,7 +92,7 @@ export function TrendSignals() {
             <Zap className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-white mb-2">No signals detected</h3>
             <p className="text-textSecondary">
-              We'll notify you when we detect potential trend changes
+              We&apos;ll notify you when we detect potential trend changes
             </p>
           </div>
         </CardContent>
