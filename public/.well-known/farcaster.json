@@ -10,7 +10,7 @@
     "subtitle": "Built with Zara",
     "description": "CryptoPulse Alerts is a Base Mini App built with Zara.",
     "iconUrl": "https://0co.to/images/zara-2.png",
-    "homeUrl": "https://e8434b4605b1421082ffa4619b7a46a2-r9vs.vercel.app",
+    "homeUrl": "https://e8434b4605b1421082ffa4619b7a46a2-wg46.vercel.app",
     "splashImageUrl": "https://e8434b4605b1421082ffa4619b7a46a2-r9vs.vercel.app/splash.png",
     "splashBackgroundColor": "#000000",
     "heroImageUrl": "https://e8434b4605b1421082ffa4619b7a46a2-r9vs.vercel.app/image.png",
@@ -25,6 +25,6 @@
       "miniapp",
       "onchainkit"
     ],
-    "webhookUrl": "https://e8434b4605b1421082ffa4619b7a46a2-r9vs.vercel.app/api/webhook"
+    "webhookUrl": "https://e8434b4605b1421082ffa4619b7a46a2-wg46.vercel.app/api/webhook"
   }
 }
