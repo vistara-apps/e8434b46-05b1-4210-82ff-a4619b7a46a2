@@ -21,14 +21,14 @@ export function AlertConfigForm({ onSubmit, editingAlert, onCancel }: AlertConfi
     alertType: editingAlert?.alertType || 'price_target',
     thresholdValue: editingAlert?.thresholdValue || 0,
     direction: editingAlert?.direction || 'above',
-    notificationChannels: editingAlert?.notificationChannels || ['browser'],
+    notificationChannels: [{ type: 'browser', enabled: true }],
   });
   
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<Partial<AlertFormData>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<AlertFormData> = {};
+    const newErrors: Record<string, string> = {};
     
     if (!formData.cryptoSymbol) {
       newErrors.cryptoSymbol = 'Please select a cryptocurrency';
@@ -64,7 +64,7 @@ export function AlertConfigForm({ onSubmit, editingAlert, onCancel }: AlertConfi
           alertType: 'price_target',
           thresholdValue: 0,
           direction: 'above',
-          notificationChannels: ['browser'],
+          notificationChannels: [{ type: 'browser', enabled: true }],
         });
       }
     } catch (error) {
@@ -74,12 +74,12 @@ export function AlertConfigForm({ onSubmit, editingAlert, onCancel }: AlertConfi
     }
   };
 
-  const handleChannelToggle = (channel: 'browser' | 'telegram') => {
+  const handleChannelToggle = (channelType: 'browser' | 'telegram') => {
     setFormData(prev => ({
       ...prev,
-      notificationChannels: prev.notificationChannels.includes(channel)
-        ? prev.notificationChannels.filter(c => c !== channel)
-        : [...prev.notificationChannels, channel]
+      notificationChannels: prev.notificationChannels.some(c => c.type === channelType)
+        ? prev.notificationChannels.filter(c => c.type !== channelType)
+        : [...prev.notificationChannels, { type: channelType, enabled: true }]
     }));
   };
 
@@ -109,7 +109,7 @@ export function AlertConfigForm({ onSubmit, editingAlert, onCancel }: AlertConfi
             onChange={(e) => setFormData(prev => ({ ...prev, cryptoSymbol: e.target.value }))}
             options={SUPPORTED_CRYPTOCURRENCIES.map(crypto => ({
               value: crypto.symbol,
-              label: `${crypto.name} (${crypto.ticker})`
+              label: `${crypto.name} (${crypto.symbol})`
             }))}
             error={errors.cryptoSymbol}
           />
@@ -123,8 +123,8 @@ export function AlertConfigForm({ onSubmit, editingAlert, onCancel }: AlertConfi
               alertType: e.target.value as 'price_target' | 'trend'
             }))}
             options={ALERT_TYPES.map(type => ({
-              value: type.value,
-              label: type.label
+              value: type.id,
+              label: type.name
             }))}
           />
 
@@ -170,17 +170,17 @@ export function AlertConfigForm({ onSubmit, editingAlert, onCancel }: AlertConfi
             <div className="space-y-2">
               {NOTIFICATION_CHANNELS.map((channel) => (
                 <label
-                  key={channel.value}
+                  key={channel.id}
                   className="flex items-center space-x-3 cursor-pointer"
                 >
                   <input
                     type="checkbox"
-                    checked={formData.notificationChannels.includes(channel.value as any)}
-                    onChange={() => handleChannelToggle(channel.value as any)}
+                    checked={formData.notificationChannels.some(c => c.type === channel.id)}
+                    onChange={() => handleChannelToggle(channel.id as any)}
                     className="rounded border-dark-border bg-dark-surface text-primary focus:ring-primary focus:ring-offset-0"
                   />
                   <span className="text-sm text-white">
-                    {channel.icon} {channel.label}
+                    {channel.icon} {channel.name}
                   </span>
                 </label>
               ))}

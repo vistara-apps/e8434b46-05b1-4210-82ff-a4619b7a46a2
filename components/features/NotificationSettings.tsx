@@ -28,9 +28,10 @@ export function NotificationSettings({ onSave }: NotificationSettingsProps) {
   const handleBrowserNotificationToggle = async () => {
     if (!settings.browserNotifications) {
       const permission = await requestNotificationPermission();
-      setPermissionStatus(permission);
+      const status = permission ? 'granted' : 'denied';
+      setPermissionStatus(status as NotificationPermission);
       
-      if (permission === 'granted') {
+      if (permission) {
         setSettings(prev => ({ ...prev, browserNotifications: true }));
       }
     } else {

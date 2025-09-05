@@ -101,6 +101,39 @@ export const MOCK_MARKET_DATA = [
   },
 ];
 
+export const MOCK_ALERTS = [
+  {
+    alertId: '1',
+    userId: 'user1',
+    cryptoSymbol: 'BTC',
+    alertType: 'price_target' as const,
+    thresholdValue: 70000,
+    status: 'active' as const,
+    createdAt: new Date('2024-01-15T10:00:00Z'),
+    direction: 'above' as const,
+  },
+  {
+    alertId: '2',
+    userId: 'user1',
+    cryptoSymbol: 'ETH',
+    alertType: 'trend' as const,
+    thresholdValue: 0,
+    status: 'triggered' as const,
+    createdAt: new Date('2024-01-14T15:30:00Z'),
+    triggeredAt: new Date('2024-01-15T09:45:00Z'),
+  },
+  {
+    alertId: '3',
+    userId: 'user1',
+    cryptoSymbol: 'SOL',
+    alertType: 'price_target' as const,
+    thresholdValue: 150,
+    status: 'active' as const,
+    createdAt: new Date('2024-01-13T08:20:00Z'),
+    direction: 'below' as const,
+  },
+];
+
 export const API_ENDPOINTS = {
   COINGECKO_PRICE: 'https://api.coingecko.com/api/v3/simple/price',
   COINGECKO_MARKETS: 'https://api.coingecko.com/api/v3/coins/markets',

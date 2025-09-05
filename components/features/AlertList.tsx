@@ -33,7 +33,7 @@ export function AlertList({ onEditAlert, onDeleteAlert }: AlertListProps) {
 
   const getCryptoTicker = (symbol: string) => {
     const crypto = SUPPORTED_CRYPTOCURRENCIES.find(c => c.symbol === symbol);
-    return crypto ? crypto.ticker : symbol.toUpperCase();
+    return crypto ? crypto.symbol.toUpperCase() : symbol.toUpperCase();
   };
 
   const handleDeleteAlert = (alertId: string) => {
