@@ -1,5 +1,6 @@
 import { MarketData, TrendSignal } from './types';
-import { MOCK_MARKET_DATA, generateSparklineData, calculateTrendIndicator } from './utils';
+import { MOCK_MARKET_DATA } from './constants';
+import { generateSparklineData, calculateTrendIndicator } from './utils';
 
 // Mock API functions for demo purposes
 // In production, these would connect to real APIs

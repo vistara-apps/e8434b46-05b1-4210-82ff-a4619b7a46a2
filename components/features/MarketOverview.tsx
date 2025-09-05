@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/Badge';
 import { MarketData } from '@/lib/types';
 import { fetchMarketData } from '@/lib/api';
 import { formatPrice, formatPercentage } from '@/lib/utils';
+import { SUPPORTED_CRYPTOCURRENCIES } from '@/lib/constants';
 
 export function MarketOverview() {
   const [marketData, setMarketData] = useState<MarketData[]>([]);
@@ -15,7 +16,7 @@ export function MarketOverview() {
   useEffect(() => {
     const loadMarketData = async () => {
       try {
-        const data = await fetchMarketData();
+        const data = await fetchMarketData(['bitcoin', 'ethereum', 'solana']);
         setMarketData(data);
       } catch (error) {
         console.error('Error loading market data:', error);
@@ -82,7 +83,7 @@ export function MarketOverview() {
             >
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 flex items-center justify-center text-lg">
-                  {crypto.image}
+                  {SUPPORTED_CRYPTOCURRENCIES.find(c => c.symbol === crypto.symbol.toUpperCase())?.icon || '💰'}
                 </div>
                 <div>
                   <div className="font-medium text-white">{crypto.name}</div>

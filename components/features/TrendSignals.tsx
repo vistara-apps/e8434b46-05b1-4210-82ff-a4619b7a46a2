@@ -16,7 +16,7 @@ export function TrendSignals() {
   useEffect(() => {
     const loadTrendSignals = async () => {
       try {
-        const data = await fetchTrendSignals();
+        const data = await fetchTrendSignals(['bitcoin', 'ethereum', 'solana']);
         setSignals(data);
       } catch (error) {
         console.error('Error loading trend signals:', error);

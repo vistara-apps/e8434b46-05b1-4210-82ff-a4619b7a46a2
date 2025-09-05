@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { AlertFormData } from './types';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -109,4 +110,22 @@ export function validateAlertForm(data: Partial<AlertFormData>): string[] {
   }
   
   return errors;
+}
+
+export async function requestNotificationPermission(): Promise<boolean> {
+  if (!('Notification' in window)) {
+    console.warn('This browser does not support notifications');
+    return false;
+  }
+
+  if (Notification.permission === 'granted') {
+    return true;
+  }
+
+  if (Notification.permission === 'denied') {
+    return false;
+  }
+
+  const permission = await Notification.requestPermission();
+  return permission === 'granted';
 }
