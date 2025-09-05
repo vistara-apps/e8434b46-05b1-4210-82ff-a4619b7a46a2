@@ -53,24 +53,45 @@ Never miss a crypto move. Get instant price alerts and trend signals.
 
 ## Architecture
 
-### Components
+### Frontend Components
 - `Dashboard`: Main overview with stats and recent alerts
 - `AlertsManager`: Full alert management interface
 - `MarketStats`: Real-time market data display
 - `AlertConfigForm`: Create/edit alert configuration
 - `AlertListItem`: Individual alert display component
 - `Settings`: User preferences and subscription management
+- `WalletConnect`: Wallet connection and authentication
+- `ErrorBoundary`: Production-ready error handling
+
+### API Endpoints
+- `GET/POST /api/market`: Real-time cryptocurrency market data
+- `GET/POST/DELETE /api/alerts`: User alert management
+- `POST /api/notifications`: Multi-channel notification system
+- `GET/POST/PUT /api/auth`: Wallet-based user authentication
+- `POST /api/webhooks/price-monitor`: Price monitoring webhook
+- `GET/POST /api/frame`: Farcaster frame integration
+- `GET /api/frame/image`: Dynamic frame image generation
 
 ### Data Flow
-1. Market data fetched from CoinGecko API
-2. User alerts stored locally (Redis in production)
-3. Price monitoring via background processes
-4. Notifications sent via browser API and Telegram
+1. **Authentication**: Wallet-based user authentication with persistent sessions
+2. **Market Data**: Real-time data from CoinGecko API with fallback support
+3. **Alert Storage**: Redis-based storage with in-memory fallback for development
+4. **Price Monitoring**: Webhook-based price monitoring with automatic alert triggering
+5. **Notifications**: Multi-channel notifications (browser + Telegram)
+6. **Frame Integration**: Full Farcaster frame support with dynamic images
 
 ### Business Model
 - **Free Tier**: 3 alert slots, basic notifications
 - **Premium Tier**: $5/month, unlimited alerts, advanced features
 - **Pay-per-slot**: $0.50 per additional alert slot
+
+### Security Features
+- Input validation on all API endpoints
+- Error boundaries for graceful error handling
+- Environment variable protection
+- Rate limiting support
+- CORS configuration
+- Wallet-based authentication
 
 ## Deployment
 

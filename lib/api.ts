@@ -1,13 +1,29 @@
-import { MarketData, TrendSignal } from './types';
+import { MarketData, TrendSignal, UserAlert, AlertFormData, User } from './types';
 import { MOCK_MARKET_DATA, generateSparklineData, calculateTrendIndicator } from './utils';
 
-// Mock API functions for demo purposes
-// In production, these would connect to real APIs
+const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
-export async function fetchMarketData(symbols: string[]): Promise<MarketData[]> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
+// Market Data API
+export async function fetchMarketData(symbols?: string[]): Promise<MarketData[]> {
+  try {
+    const symbolsParam = symbols ? `?symbols=${symbols.join(',')}&sparkline=true` : '?sparkline=true';
+    const response = await fetch(`${API_BASE_URL}/api/market${symbolsParam}`);
+    const result = await response.json();
+    
+    if (result.success) {
+      return result.data;
+    } else {
+      // Fallback to mock data if API fails
+      console.warn('Market API failed, using fallback data:', result.error);
+      return result.data || getMockMarketData();
+    }
+  } catch (error) {
+    console.error('Market data fetch error:', error);
+    return getMockMarketData();
+  }
+}
+
+function getMockMarketData(): MarketData[] {
   return MOCK_MARKET_DATA.map(coin => ({
     ...coin,
     timestamp: new Date(),
@@ -82,6 +98,125 @@ export async function sendTelegramNotification(
   return true;
 }
 
+// Authentication API
+export async function authenticateUser(walletAddress: string, telegramId?: string): Promise<User> {
+  const response = await fetch(`${API_BASE_URL}/api/auth`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ walletAddress, telegramId }),
+  });
+
+  const result = await response.json();
+  if (!result.success) {
+    throw new Error(result.error || 'Authentication failed');
+  }
+
+  return result.data;
+}
+
+export async function fetchUser(userId: string): Promise<User> {
+  const response = await fetch(`${API_BASE_URL}/api/auth?userId=${userId}`);
+  const result = await response.json();
+  
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to fetch user');
+  }
+
+  return result.data;
+}
+
+export async function updateUser(userId: string, updates: Partial<User>): Promise<User> {
+  const response = await fetch(`${API_BASE_URL}/api/auth`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ userId, updates }),
+  });
+
+  const result = await response.json();
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to update user');
+  }
+
+  return result.data;
+}
+
+// Alerts API
+export async function fetchUserAlerts(userId: string): Promise<UserAlert[]> {
+  const response = await fetch(`${API_BASE_URL}/api/alerts?userId=${userId}`);
+  const result = await response.json();
+  
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to fetch alerts');
+  }
+
+  return result.data;
+}
+
+export async function createAlert(userId: string, alertData: AlertFormData): Promise<UserAlert> {
+  const response = await fetch(`${API_BASE_URL}/api/alerts`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ userId, alertData }),
+  });
+
+  const result = await response.json();
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to create alert');
+  }
+
+  return result.data;
+}
+
+export async function deleteAlert(userId: string, alertId: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/alerts?userId=${userId}&alertId=${alertId}`, {
+    method: 'DELETE',
+  });
+
+  const result = await response.json();
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to delete alert');
+  }
+}
+
+// Notifications API
+export async function sendNotification(
+  userId: string,
+  title: string,
+  message: string,
+  channels: ('browser' | 'telegram')[],
+  telegramChatId?: string,
+  alertId?: string
+): Promise<boolean> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/notifications`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId,
+        title,
+        message,
+        channels,
+        telegramChatId,
+        alertId,
+      }),
+    });
+
+    const result = await response.json();
+    return result.success;
+  } catch (error) {
+    console.error('Notification send error:', error);
+    return false;
+  }
+}
+
 export async function sendBrowserNotification(
   title: string,
   message: string,
@@ -106,4 +241,16 @@ export async function sendBrowserNotification(
     }
   }
   return false;
+}
+
+export async function testTelegramSetup(): Promise<{ success: boolean; bot?: any; error?: string }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/notifications?test=telegram`);
+    return await response.json();
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Failed to test Telegram setup',
+    };
+  }
 }
