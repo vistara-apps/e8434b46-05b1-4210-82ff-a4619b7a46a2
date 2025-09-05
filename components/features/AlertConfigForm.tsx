@@ -7,6 +7,14 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { AlertFormData, UserAlert } from '@/lib/types';
+
+interface FormErrors {
+  cryptoSymbol?: string;
+  alertType?: string;
+  thresholdValue?: string;
+  direction?: string;
+  notificationChannels?: string;
+}
 import { SUPPORTED_CRYPTOCURRENCIES, ALERT_TYPES, NOTIFICATION_CHANNELS } from '@/lib/constants';
 
 interface AlertConfigFormProps {
@@ -25,10 +33,10 @@ export function AlertConfigForm({ onSubmit, editingAlert, onCancel }: AlertConfi
   });
   
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<Partial<AlertFormData>>({});
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<AlertFormData> = {};
+    const newErrors: FormErrors = {};
     
     if (!formData.cryptoSymbol) {
       newErrors.cryptoSymbol = 'Please select a cryptocurrency';

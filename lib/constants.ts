@@ -49,7 +49,7 @@ export const MOCK_ALERTS = [
     status: 'active' as const,
     createdAt: new Date(),
     direction: 'above' as const,
-    notificationChannels: ['browser', 'telegram'] as const,
+    notificationChannels: ['browser', 'telegram'] as ('browser' | 'telegram')[],
   },
   {
     alertId: '2',
@@ -59,6 +59,6 @@ export const MOCK_ALERTS = [
     thresholdValue: 0,
     status: 'active' as const,
     createdAt: new Date(),
-    notificationChannels: ['browser'] as const,
+    notificationChannels: ['browser'] as ('browser' | 'telegram')[],
   },
 ];
