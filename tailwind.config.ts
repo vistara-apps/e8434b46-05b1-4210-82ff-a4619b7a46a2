@@ -54,6 +54,13 @@ const config: Config = {
           900: "var(--accent-900)",
           950: "var(--accent-950)",
         },
+        // Custom theme colors
+        "dark-bg": "var(--dark-bg)",
+        "dark-surface": "var(--dark-surface)",
+        "dark-border": "var(--dark-border)",
+        "textSecondary": "var(--textSecondary)",
+        "positive": "var(--positive)",
+        "negative": "var(--negative)",
         muted: {
           DEFAULT: "var(--muted)",
           foreground: "var(--muted-foreground)",

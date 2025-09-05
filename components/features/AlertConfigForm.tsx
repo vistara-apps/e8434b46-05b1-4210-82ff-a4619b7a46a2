@@ -15,6 +15,12 @@ interface AlertConfigFormProps {
   onCancel?: () => void;
 }
 
+interface FormErrors {
+  cryptoSymbol?: string;
+  thresholdValue?: string;
+  notificationChannels?: string;
+}
+
 export function AlertConfigForm({ onSubmit, editingAlert, onCancel }: AlertConfigFormProps) {
   const [formData, setFormData] = useState<AlertFormData>({
     cryptoSymbol: editingAlert?.cryptoSymbol || 'bitcoin',
@@ -25,10 +31,10 @@ export function AlertConfigForm({ onSubmit, editingAlert, onCancel }: AlertConfi
   });
   
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<Partial<AlertFormData>>({});
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<AlertFormData> = {};
+    const newErrors: FormErrors = {};
     
     if (!formData.cryptoSymbol) {
       newErrors.cryptoSymbol = 'Please select a cryptocurrency';

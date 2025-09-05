@@ -2,14 +2,49 @@ import { MarketData, TrendSignal } from './types';
 import { SUPPORTED_CRYPTOCURRENCIES, API_ENDPOINTS } from './constants';
 import { calculateTrendSignal, generateMockPriceHistory } from './utils';
 
-// Mock data for development - replace with real API calls in production
+// Helper function to determine trend indicator based on price change
+function getTrendIndicator(priceChangePercentage: number): 'bullish' | 'bearish' | 'neutral' {
+  if (priceChangePercentage > 2) return 'bullish';
+  if (priceChangePercentage < -2) return 'bearish';
+  return 'neutral';
+}
+
+// Fetch real market data from CoinGecko API
 export async function fetchMarketData(): Promise<MarketData[]> {
   try {
-    // In production, use real CoinGecko API
-    // const response = await fetch(`${API_ENDPOINTS.COINGECKO_MARKETS}?vs_currency=usd&order=market_cap_desc&per_page=10&page=1`);
-    // const data = await response.json();
+    const response = await fetch(
+      `${API_ENDPOINTS.COINGECKO_MARKETS}?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false&price_change_percentage=24h`,
+      {
+        headers: {
+          'Accept': 'application/json',
+        },
+      }
+    );
     
-    // Mock data for development
+    if (!response.ok) {
+      throw new Error(`CoinGecko API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    const marketData: MarketData[] = data.map((coin: any) => ({
+      symbol: coin.id,
+      name: coin.name,
+      price: coin.current_price,
+      priceChange24h: coin.price_change_24h || 0,
+      priceChangePercentage24h: coin.price_change_percentage_24h || 0,
+      marketCap: coin.market_cap || 0,
+      volume24h: coin.total_volume || 0,
+      timestamp: new Date(),
+      trendIndicator: getTrendIndicator(coin.price_change_percentage_24h || 0),
+      image: coin.image,
+    }));
+    
+    return marketData;
+  } catch (error) {
+    console.error('Error fetching market data:', error);
+    
+    // Fallback to mock data if API fails
     const mockData: MarketData[] = [
       {
         symbol: 'bitcoin',
@@ -50,20 +85,30 @@ export async function fetchMarketData(): Promise<MarketData[]> {
     ];
     
     return mockData;
-  } catch (error) {
-    console.error('Error fetching market data:', error);
-    return [];
   }
 }
 
 export async function fetchCryptoPrice(symbol: string): Promise<number | null> {
   try {
-    // In production, use real CoinGecko API
-    // const response = await fetch(`${API_ENDPOINTS.COINGECKO_PRICE}?ids=${symbol}&vs_currencies=usd`);
-    // const data = await response.json();
-    // return data[symbol]?.usd || null;
+    const response = await fetch(
+      `${API_ENDPOINTS.COINGECKO_PRICE}?ids=${symbol}&vs_currencies=usd`,
+      {
+        headers: {
+          'Accept': 'application/json',
+        },
+      }
+    );
     
-    // Mock data for development
+    if (!response.ok) {
+      throw new Error(`CoinGecko API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data[symbol]?.usd || null;
+  } catch (error) {
+    console.error('Error fetching crypto price:', error);
+    
+    // Fallback to mock data if API fails
     const mockPrices: Record<string, number> = {
       bitcoin: 67500,
       ethereum: 3850,
@@ -73,9 +118,6 @@ export async function fetchCryptoPrice(symbol: string): Promise<number | null> {
     };
     
     return mockPrices[symbol] || null;
-  } catch (error) {
-    console.error('Error fetching crypto price:', error);
-    return null;
   }
 }
 
