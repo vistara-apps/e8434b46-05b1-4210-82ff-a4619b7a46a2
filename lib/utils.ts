@@ -33,7 +33,7 @@ export function formatMarketCap(marketCap: number): string {
   if (marketCap >= 1000000) {
     return `$${(marketCap / 1000000).toFixed(2)}M`;
   }
-  return `$${marketCap.toFixed(0)}`;
+  return `$${marketCap.toLocaleString()}`;
 }
 
 export function getTimeAgo(date: Date): string {
@@ -58,48 +58,55 @@ export function getTimeAgo(date: Date): string {
   return `${diffInDays}d ago`;
 }
 
-export function generateMockPriceHistory(basePrice: number, days: number = 7): Array<{ timestamp: Date; price: number }> {
-  const history = [];
-  const now = new Date();
+export function generateSparklineData(basePrice: number, volatility: number = 0.1): number[] {
+  const points = 24; // 24 hours of data
+  const data: number[] = [];
+  let currentPrice = basePrice;
   
-  for (let i = days; i >= 0; i--) {
-    const timestamp = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-    const volatility = 0.05; // 5% daily volatility
-    const randomChange = (Math.random() - 0.5) * 2 * volatility;
-    const price = basePrice * (1 + randomChange * (days - i) / days);
-    
-    history.push({ timestamp, price });
+  for (let i = 0; i < points; i++) {
+    const change = (Math.random() - 0.5) * volatility * basePrice;
+    currentPrice += change;
+    data.push(Math.max(0, currentPrice));
   }
   
-  return history;
+  return data;
 }
 
-export function calculateTrendSignal(priceHistory: Array<{ price: number }>): 'bullish' | 'bearish' | 'neutral' {
-  if (priceHistory.length < 3) return 'neutral';
+export function calculateTrendIndicator(sparkline: number[]): 'bullish' | 'bearish' | 'neutral' {
+  if (sparkline.length < 2) return 'neutral';
   
-  const recent = priceHistory.slice(-3);
-  const trend = recent[2].price - recent[0].price;
-  const threshold = recent[0].price * 0.02; // 2% threshold
+  const start = sparkline[0];
+  const end = sparkline[sparkline.length - 1];
+  const change = (end - start) / start;
   
-  if (trend > threshold) return 'bullish';
-  if (trend < -threshold) return 'bearish';
+  if (change > 0.05) return 'bullish';
+  if (change < -0.05) return 'bearish';
   return 'neutral';
 }
 
-export function requestNotificationPermission(): Promise<NotificationPermission> {
-  if (!('Notification' in window)) {
-    return Promise.resolve('denied');
+export function validateAlertForm(data: Partial<AlertFormData>): string[] {
+  const errors: string[] = [];
+  
+  if (!data.cryptoSymbol) {
+    errors.push('Cryptocurrency symbol is required');
   }
   
-  return Notification.requestPermission();
-}
-
-export function sendBrowserNotification(title: string, options?: NotificationOptions) {
-  if (Notification.permission === 'granted') {
-    new Notification(title, {
-      icon: '/icon-192x192.png',
-      badge: '/icon-192x192.png',
-      ...options,
-    });
+  if (!data.alertType) {
+    errors.push('Alert type is required');
   }
+  
+  if (data.alertType === 'price_target') {
+    if (!data.thresholdValue || data.thresholdValue <= 0) {
+      errors.push('Valid price threshold is required');
+    }
+    if (!data.direction) {
+      errors.push('Price direction is required');
+    }
+  }
+  
+  if (!data.notificationChannels || data.notificationChannels.length === 0) {
+    errors.push('At least one notification channel must be selected');
+  }
+  
+  return errors;
 }

@@ -8,20 +8,26 @@
   }
   
   html {
-    @apply h-full;
+    @apply dark;
   }
   
   body {
-    @apply h-full bg-dark-bg text-white font-sans antialiased;
+    @apply bg-dark-bg text-dark-text font-sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
 @layer components {
   .glass-card {
-    @apply bg-dark-surface border border-dark-border rounded-lg backdrop-blur-sm;
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
+    @apply bg-dark-surface/80 backdrop-blur-sm border border-dark-border rounded-lg shadow-dark-card;
+  }
+  
+  .alert-card {
+    @apply glass-card p-4 hover:bg-dark-card/50 transition-all duration-200;
+  }
+  
+  .metric-card {
+    @apply glass-card p-4 hover:bg-opacity-15 transition-all duration-200;
   }
   
   .btn-primary {
@@ -29,15 +35,19 @@
   }
   
   .btn-secondary {
-    @apply bg-dark-surface border border-dark-border text-white px-4 py-2 rounded-md hover:bg-opacity-80 transition-all duration-200;
+    @apply bg-dark-surface border border-dark-border text-dark-text px-4 py-2 rounded-lg hover:bg-dark-card transition-all duration-200;
   }
   
-  .metric-card {
-    @apply glass-card p-4 hover:bg-opacity-15 transition-all duration-200;
+  .input-field {
+    @apply bg-dark-surface border border-dark-border rounded-lg px-4 py-3 text-dark-text placeholder-dark-textSecondary focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200;
   }
   
-  .alert-item {
-    @apply glass-card p-4 mb-3 hover:bg-opacity-20 transition-all duration-200 cursor-pointer;
+  .sidebar-item {
+    @apply flex items-center gap-3 px-4 py-3 text-dark-textSecondary hover:text-dark-text hover:bg-dark-card rounded-lg transition-all duration-200 cursor-pointer;
+  }
+  
+  .sidebar-item.active {
+    @apply text-primary bg-primary/10 border-r-2 border-primary;
   }
   
   .price-positive {
@@ -49,28 +59,29 @@
   }
   
   .trend-indicator {
-    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+    @apply inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium;
   }
   
   .trend-up {
-    @apply bg-positive bg-opacity-20 text-positive;
+    @apply bg-positive/20 text-positive;
   }
   
   .trend-down {
-    @apply bg-negative bg-opacity-20 text-negative;
+    @apply bg-negative/20 text-negative;
   }
   
-  .notification-badge {
-    @apply absolute -top-1 -right-1 bg-negative text-white text-xs rounded-full h-5 w-5 flex items-center justify-center;
+  .trend-neutral {
+    @apply bg-gray-500/20 text-gray-400;
   }
 }
 
 @layer utilities {
-  .text-gradient {
-    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
   
-  .border-gradient {
-    border-image: linear-gradient(90deg, hsl(220, 100%, 50%), hsl(160, 100%, 45%)) 1;
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }

@@ -19,7 +19,10 @@ module.exports = {
         dark: {
           bg: 'hsl(220, 15%, 8%)',
           surface: 'hsl(220, 15%, 12%)',
+          card: 'hsl(220, 15%, 16%)',
           border: 'hsl(220, 15%, 20%)',
+          text: 'hsl(220, 15%, 85%)',
+          textSecondary: 'hsl(220, 15%, 65%)',
         }
       },
       borderRadius: {
@@ -35,10 +38,11 @@ module.exports = {
       },
       boxShadow: {
         'card': '0 4px 12px hsla(220, 15%, 15%, 0.08)',
+        'dark-card': '0 4px 12px hsla(0, 0%, 0%, 0.3)',
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'bounce-subtle': 'bounce 2s infinite',
+        'bounce-slow': 'bounce 2s infinite',
       }
     },
   },

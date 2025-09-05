@@ -1,64 +1,116 @@
 export const SUPPORTED_CRYPTOCURRENCIES = [
-  { symbol: 'bitcoin', name: 'Bitcoin', ticker: 'BTC' },
-  { symbol: 'ethereum', name: 'Ethereum', ticker: 'ETH' },
-  { symbol: 'binancecoin', name: 'BNB', ticker: 'BNB' },
-  { symbol: 'cardano', name: 'Cardano', ticker: 'ADA' },
-  { symbol: 'solana', name: 'Solana', ticker: 'SOL' },
-  { symbol: 'polkadot', name: 'Polkadot', ticker: 'DOT' },
-  { symbol: 'chainlink', name: 'Chainlink', ticker: 'LINK' },
-  { symbol: 'polygon', name: 'Polygon', ticker: 'MATIC' },
-  { symbol: 'avalanche-2', name: 'Avalanche', ticker: 'AVAX' },
-  { symbol: 'uniswap', name: 'Uniswap', ticker: 'UNI' },
+  { symbol: 'BTC', name: 'Bitcoin', icon: '₿' },
+  { symbol: 'ETH', name: 'Ethereum', icon: 'Ξ' },
+  { symbol: 'SOL', name: 'Solana', icon: '◎' },
+  { symbol: 'ADA', name: 'Cardano', icon: '₳' },
+  { symbol: 'DOT', name: 'Polkadot', icon: '●' },
+  { symbol: 'LINK', name: 'Chainlink', icon: '⬢' },
+  { symbol: 'MATIC', name: 'Polygon', icon: '⬟' },
+  { symbol: 'AVAX', name: 'Avalanche', icon: '▲' },
+  { symbol: 'UNI', name: 'Uniswap', icon: '🦄' },
+  { symbol: 'AAVE', name: 'Aave', icon: '👻' },
 ];
 
 export const ALERT_TYPES = [
-  { value: 'price_target', label: 'Price Target', description: 'Get notified when price reaches a specific value' },
-  { value: 'trend', label: 'Trend Signal', description: 'Get notified about potential trend changes' },
+  {
+    id: 'price_target',
+    name: 'Price Target',
+    description: 'Get notified when price reaches a specific value',
+    icon: '🎯',
+  },
+  {
+    id: 'trend',
+    name: 'Trend Signal',
+    description: 'Get notified about potential trend changes',
+    icon: '📈',
+  },
 ];
 
 export const NOTIFICATION_CHANNELS = [
-  { value: 'browser', label: 'Browser Notifications', icon: '🔔' },
-  { value: 'telegram', label: 'Telegram', icon: '📱' },
+  {
+    id: 'browser',
+    name: 'Browser Notifications',
+    description: 'Instant notifications in your browser',
+    icon: '🔔',
+  },
+  {
+    id: 'telegram',
+    name: 'Telegram',
+    description: 'Messages sent to your Telegram',
+    icon: '📱',
+  },
 ];
 
-export const PRICING = {
-  ALERT_SLOT_PRICE: 0.5, // $0.50 per slot
-  MONTHLY_SUBSCRIPTION: 5.0, // $5/month for unlimited
-  FREE_ALERT_SLOTS: 3,
-};
+export const SUBSCRIPTION_PLANS = [
+  {
+    id: 'free',
+    name: 'Free',
+    price: 0,
+    alertSlots: 3,
+    features: [
+      '3 active alerts',
+      'Basic price notifications',
+      'Browser notifications only',
+    ],
+  },
+  {
+    id: 'premium',
+    name: 'Premium',
+    price: 5,
+    alertSlots: -1, // unlimited
+    features: [
+      'Unlimited alerts',
+      'Advanced trend signals',
+      'Multi-channel notifications',
+      'Priority support',
+      'Market insights',
+    ],
+  },
+];
+
+export const MOCK_MARKET_DATA = [
+  {
+    symbol: 'BTC',
+    name: 'Bitcoin',
+    price: 67855.23,
+    priceChange24h: 1234.56,
+    priceChangePercentage24h: 1.85,
+    marketCap: 1340000000000,
+    volume24h: 28500000000,
+    trendIndicator: 'bullish' as const,
+  },
+  {
+    symbol: 'ETH',
+    name: 'Ethereum',
+    price: 3456.78,
+    priceChange24h: -89.12,
+    priceChangePercentage24h: -2.51,
+    marketCap: 415000000000,
+    volume24h: 15200000000,
+    trendIndicator: 'bearish' as const,
+  },
+  {
+    symbol: 'SOL',
+    name: 'Solana',
+    price: 178.45,
+    priceChange24h: 12.34,
+    priceChangePercentage24h: 7.43,
+    marketCap: 82000000000,
+    volume24h: 3400000000,
+    trendIndicator: 'bullish' as const,
+  },
+];
 
 export const API_ENDPOINTS = {
   COINGECKO_PRICE: 'https://api.coingecko.com/api/v3/simple/price',
   COINGECKO_MARKETS: 'https://api.coingecko.com/api/v3/coins/markets',
-  COINGECKO_HISTORY: 'https://api.coingecko.com/api/v3/coins/{id}/market_chart',
+  TELEGRAM_BOT: 'https://api.telegram.org/bot',
 };
 
-export const TREND_INDICATORS = {
-  BULLISH: { label: 'Bullish', color: 'text-positive', bgColor: 'bg-positive' },
-  BEARISH: { label: 'Bearish', color: 'text-negative', bgColor: 'bg-negative' },
-  NEUTRAL: { label: 'Neutral', color: 'text-gray-400', bgColor: 'bg-gray-400' },
+export const CHART_COLORS = {
+  positive: '#22c55e',
+  negative: '#ef4444',
+  neutral: '#6b7280',
+  primary: '#3b82f6',
+  accent: '#10b981',
 };
-
-export const MOCK_ALERTS = [
-  {
-    alertId: '1',
-    userId: 'user1',
-    cryptoSymbol: 'bitcoin',
-    alertType: 'price_target' as const,
-    thresholdValue: 75000,
-    status: 'active' as const,
-    createdAt: new Date(),
-    direction: 'above' as const,
-    notificationChannels: ['browser', 'telegram'] as const,
-  },
-  {
-    alertId: '2',
-    userId: 'user1',
-    cryptoSymbol: 'ethereum',
-    alertType: 'trend' as const,
-    thresholdValue: 0,
-    status: 'active' as const,
-    createdAt: new Date(),
-    notificationChannels: ['browser'] as const,
-  },
-];

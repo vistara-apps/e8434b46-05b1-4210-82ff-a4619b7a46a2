@@ -8,18 +8,10 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'CryptoPulse Alerts',
   description: 'Never miss a crypto move. Get instant price alerts and trend signals.',
-  keywords: 'crypto, alerts, price, notifications, trading, Base, MiniApp',
+  keywords: ['crypto', 'alerts', 'price', 'notifications', 'trading', 'base'],
   authors: [{ name: 'CryptoPulse Team' }],
-  openGraph: {
-    title: 'CryptoPulse Alerts',
-    description: 'Never miss a crypto move. Get instant price alerts and trend signals.',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'CryptoPulse Alerts',
-    description: 'Never miss a crypto move. Get instant price alerts and trend signals.',
-  },
+  viewport: 'width=device-width, initial-scale=1',
+  themeColor: '#1e40af',
 };
 
 export default function RootLayout({

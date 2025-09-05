@@ -22,7 +22,10 @@ export interface UserAlert {
   createdAt: Date;
   triggeredAt?: Date;
   direction?: 'above' | 'below';
-  notificationChannels: ('browser' | 'telegram')[];
+  metadata?: {
+    currentPrice?: number;
+    percentageChange?: number;
+  };
 }
 
 export interface MarketData {
@@ -35,28 +38,24 @@ export interface MarketData {
   volume24h: number;
   timestamp: Date;
   trendIndicator?: 'bullish' | 'bearish' | 'neutral';
-  image?: string;
+  sparkline?: number[];
 }
 
 export interface TrendSignal {
   symbol: string;
-  signal: 'bullish' | 'bearish';
+  signal: 'bullish' | 'bearish' | 'neutral';
   confidence: number;
   reason: string;
   timestamp: Date;
   targetPrice?: number;
 }
 
-export interface NotificationPayload {
-  title: string;
-  message: string;
-  type: 'price_alert' | 'trend_signal' | 'market_update';
-  data?: any;
-}
-
-export interface PriceHistory {
-  timestamp: Date;
-  price: number;
+export interface NotificationChannel {
+  type: 'browser' | 'telegram';
+  enabled: boolean;
+  config?: {
+    telegramChatId?: string;
+  };
 }
 
 export interface AlertFormData {
@@ -64,5 +63,5 @@ export interface AlertFormData {
   alertType: 'price_target' | 'trend';
   thresholdValue: number;
   direction: 'above' | 'below';
-  notificationChannels: ('browser' | 'telegram')[];
+  notificationChannels: NotificationChannel[];
 }
