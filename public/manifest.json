@@ -8,7 +8,7 @@
       "name": "CryptoPulse Alerts",
       "description": "CryptoPulse Alerts is a Base Mini App built with Zara.",
       "url": "https://e8434b46-05b1-4210-82ff-a4619b7a46a2.vercel.app",
-      "icon": "https://0co.to/images/zara-2.png"
+      "icon": "/icon-192x192.png"
     }
   }
 }
