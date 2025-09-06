@@ -2,10 +2,16 @@ import { Redis } from '@upstash/redis';
 import { User, UserAlert, MarketData } from './types';
 
 // Initialize Redis client for caching and session storage
+// Use fallback values for build time when env vars might not be available
 const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  url: process.env.UPSTASH_REDIS_REST_URL || 'https://fallback-redis-url.upstash.io',
+  token: process.env.UPSTASH_REDIS_REST_TOKEN || 'fallback-token',
 });
+
+// Helper function to check if Redis is properly configured
+const isRedisConfigured = () => {
+  return !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+};
 
 // Database operations for Users
 export class UserDatabase {
