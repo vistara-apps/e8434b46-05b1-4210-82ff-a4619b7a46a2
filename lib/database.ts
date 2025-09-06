@@ -2,11 +2,12 @@ import { Redis } from '@upstash/redis';
 import { User, UserAlert, MarketData } from './types';
 
 // Initialize Redis client for caching and session storage
-// Use fallback values for build time when env vars might not be available
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL || 'https://fallback-redis-url.upstash.io',
-  token: process.env.UPSTASH_REDIS_REST_TOKEN || 'fallback-token',
-});
+const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+  ? new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    })
+  : null;
 
 // Helper function to check if Redis is properly configured
 const isRedisConfigured = () => {
@@ -22,15 +23,24 @@ export class UserDatabase {
       ...user,
     };
     
-    await redis.hset(`user:${userId}`, {
-      ...newUser,
-      notificationPreferences: JSON.stringify(newUser.notificationPreferences),
-      subscription: newUser.subscription ? JSON.stringify(newUser.subscription) : undefined,
-    });
+    if (redis) {
+      await redis.hset(`user:${userId}`, {
+        ...newUser,
+        notificationPreferences: JSON.stringify(newUser.notificationPreferences),
+        subscription: newUser.subscription ? JSON.stringify(newUser.subscription) : undefined,
+      });
+    } else {
+      console.warn('Redis not configured - user data will not be persisted');
+    }
     return newUser;
   }
 
   static async findById(userId: string): Promise<User | null> {
+    if (!redis) {
+      console.warn('Redis not configured - returning null for user lookup');
+      return null;
+    }
+    
     const user = await redis.hgetall(`user:${userId}`);
     if (!user || Object.keys(user).length === 0) return null;
     
@@ -48,16 +58,26 @@ export class UserDatabase {
     if (!existingUser) return null;
 
     const updatedUser = { ...existingUser, ...updates };
-    await redis.hset(`user:${userId}`, {
-      ...updatedUser,
-      notificationPreferences: JSON.stringify(updatedUser.notificationPreferences),
-      subscription: updatedUser.subscription ? JSON.stringify(updatedUser.subscription) : undefined,
-    });
+    
+    if (redis) {
+      await redis.hset(`user:${userId}`, {
+        ...updatedUser,
+        notificationPreferences: JSON.stringify(updatedUser.notificationPreferences),
+        subscription: updatedUser.subscription ? JSON.stringify(updatedUser.subscription) : undefined,
+      });
+    } else {
+      console.warn('Redis not configured - user update will not be persisted');
+    }
     
     return updatedUser;
   }
 
   static async delete(userId: string): Promise<boolean> {
+    if (!redis) {
+      console.warn('Redis not configured - user deletion will not be persisted');
+      return false;
+    }
+    
     const result = await redis.del(`user:${userId}`);
     return result > 0;
   }
@@ -72,26 +92,35 @@ export class AlertDatabase {
       ...alert,
     };
     
-    // Store alert
-    await redis.hset(`alert:${alertId}`, {
-      ...newAlert,
-      createdAt: newAlert.createdAt.toISOString(),
-      triggeredAt: newAlert.triggeredAt?.toISOString(),
-      notificationChannels: JSON.stringify(newAlert.notificationChannels),
-    });
-    
-    // Add to user's alert list
-    await redis.sadd(`user_alerts:${alert.userId}`, alertId);
-    
-    // Add to active alerts index for monitoring
-    if (newAlert.status === 'active') {
-      await redis.sadd('active_alerts', alertId);
+    if (redis) {
+      // Store alert
+      await redis.hset(`alert:${alertId}`, {
+        ...newAlert,
+        createdAt: newAlert.createdAt.toISOString(),
+        triggeredAt: newAlert.triggeredAt?.toISOString(),
+        notificationChannels: JSON.stringify(newAlert.notificationChannels),
+      });
+      
+      // Add to user's alert list
+      await redis.sadd(`user_alerts:${alert.userId}`, alertId);
+      
+      // Add to active alerts index for monitoring
+      if (newAlert.status === 'active') {
+        await redis.sadd('active_alerts', alertId);
+      }
+    } else {
+      console.warn('Redis not configured - alert will not be persisted');
     }
     
     return newAlert;
   }
 
   static async findById(alertId: string): Promise<UserAlert | null> {
+    if (!redis) {
+      console.warn('Redis not configured - returning null for alert lookup');
+      return null;
+    }
+    
     const alert = await redis.hgetall(`alert:${alertId}`);
     if (!alert || Object.keys(alert).length === 0) return null;
     
@@ -110,6 +139,11 @@ export class AlertDatabase {
   }
 
   static async findByUserId(userId: string): Promise<UserAlert[]> {
+    if (!redis) {
+      console.warn('Redis not configured - returning empty alerts array');
+      return [];
+    }
+    
     const alertIds = await redis.smembers(`user_alerts:${userId}`);
     const alerts: UserAlert[] = [];
     
@@ -122,6 +156,11 @@ export class AlertDatabase {
   }
 
   static async findActiveAlerts(): Promise<UserAlert[]> {
+    if (!redis) {
+      console.warn('Redis not configured - returning empty active alerts array');
+      return [];
+    }
+    
     const alertIds = await redis.smembers('active_alerts');
     const alerts: UserAlert[] = [];
     
@@ -141,18 +180,22 @@ export class AlertDatabase {
 
     const updatedAlert = { ...existingAlert, ...updates };
     
-    await redis.hset(`alert:${alertId}`, {
-      ...updatedAlert,
-      createdAt: updatedAlert.createdAt.toISOString(),
-      triggeredAt: updatedAlert.triggeredAt?.toISOString(),
-      notificationChannels: JSON.stringify(updatedAlert.notificationChannels),
-    });
-    
-    // Update active alerts index
-    if (updatedAlert.status === 'active') {
-      await redis.sadd('active_alerts', alertId);
+    if (redis) {
+      await redis.hset(`alert:${alertId}`, {
+        ...updatedAlert,
+        createdAt: updatedAlert.createdAt.toISOString(),
+        triggeredAt: updatedAlert.triggeredAt?.toISOString(),
+        notificationChannels: JSON.stringify(updatedAlert.notificationChannels),
+      });
+      
+      // Update active alerts index
+      if (updatedAlert.status === 'active') {
+        await redis.sadd('active_alerts', alertId);
+      } else {
+        await redis.srem('active_alerts', alertId);
+      }
     } else {
-      await redis.srem('active_alerts', alertId);
+      console.warn('Redis not configured - alert update will not be persisted');
     }
     
     return updatedAlert;
@@ -161,6 +204,11 @@ export class AlertDatabase {
   static async delete(alertId: string): Promise<boolean> {
     const alert = await this.findById(alertId);
     if (!alert) return false;
+    
+    if (!redis) {
+      console.warn('Redis not configured - alert deletion will not be persisted');
+      return false;
+    }
     
     // Remove from user's alert list
     await redis.srem(`user_alerts:${alert.userId}`, alertId);
@@ -177,6 +225,11 @@ export class AlertDatabase {
 // Cache operations for MarketData
 export class MarketDataCache {
   static async set(symbol: string, data: MarketData, ttlSeconds: number = 60): Promise<void> {
+    if (!redis) {
+      console.warn('Redis not configured - market data will not be cached');
+      return;
+    }
+    
     await redis.setex(`market:${symbol}`, ttlSeconds, JSON.stringify({
       ...data,
       timestamp: data.timestamp.toISOString(),
@@ -184,6 +237,11 @@ export class MarketDataCache {
   }
 
   static async get(symbol: string): Promise<MarketData | null> {
+    if (!redis) {
+      console.warn('Redis not configured - returning null for market data lookup');
+      return null;
+    }
+    
     const data = await redis.get(`market:${symbol}`);
     if (!data) return null;
     
@@ -195,6 +253,11 @@ export class MarketDataCache {
   }
 
   static async setMultiple(dataArray: MarketData[], ttlSeconds: number = 60): Promise<void> {
+    if (!redis) {
+      console.warn('Redis not configured - market data batch will not be cached');
+      return;
+    }
+    
     const pipeline = redis.pipeline();
     
     for (const data of dataArray) {
@@ -208,6 +271,11 @@ export class MarketDataCache {
   }
 
   static async getMultiple(symbols: string[]): Promise<MarketData[]> {
+    if (!redis) {
+      console.warn('Redis not configured - returning empty market data array');
+      return [];
+    }
+    
     const pipeline = redis.pipeline();
     
     for (const symbol of symbols) {
@@ -237,16 +305,32 @@ export class MarketDataCache {
 export class SessionManager {
   static async createSession(userId: string, sessionData: any): Promise<string> {
     const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    await redis.setex(`session:${sessionId}`, 86400, JSON.stringify({ userId, ...sessionData })); // 24 hours
+    
+    if (redis) {
+      await redis.setex(`session:${sessionId}`, 86400, JSON.stringify({ userId, ...sessionData })); // 24 hours
+    } else {
+      console.warn('Redis not configured - session will not be persisted');
+    }
+    
     return sessionId;
   }
 
   static async getSession(sessionId: string): Promise<any | null> {
+    if (!redis) {
+      console.warn('Redis not configured - returning null for session lookup');
+      return null;
+    }
+    
     const data = await redis.get(`session:${sessionId}`);
     return data ? JSON.parse(data as string) : null;
   }
 
   static async deleteSession(sessionId: string): Promise<boolean> {
+    if (!redis) {
+      console.warn('Redis not configured - session deletion will not be persisted');
+      return false;
+    }
+    
     const result = await redis.del(`session:${sessionId}`);
     return result > 0;
   }
